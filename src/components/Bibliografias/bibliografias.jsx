@@ -11,12 +11,29 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 
 export const Bibliografias = () => {
+    const [page, setPage] = useState(1);
+    
+    const nextPage = () => {
+        setPage(page + 1);
+    }
+
+    const prevPage = () => {
+        setPage(page - 1);
+    }
+
+    const find = (evt) => {
+        const { value } = evt.target;
+        setQuery(value);
+    }
+
+    const [query, setQuery] = useState("");
+
     const fetchData = async () => {
         try {
-            let response = await fetch("https://localhost:7106/Resource/Type/1");
+            let response = await fetch(`https://localhost:7106/Resource/Type/1?page=${page}&pageSize=5&query=${query}`);
             let json = await response.json();
             
-            setBibliografias(json);
+            setBibliografias(json.list);
 
             console.log(json);
         } catch(e) {
@@ -28,13 +45,17 @@ export const Bibliografias = () => {
     
     const [loading, setLoading] = useState(true);
     const [bibliografias, setBibliografias] = useState([]);
+    
     useEffect(() => {
         setLoading(true);
         fetchData();  
-    }, []);
+    }, [page, query]);
     
     return (
         <>
+            <Link to="/bibliografia" className="btn btn-primary">Nuevo</Link>
+
+            <input type="text" value={query} onChange={find}/>
             {
                 loading ?
                     <div className='spinner'><ImSpinner3/></div> :
@@ -66,7 +87,9 @@ export const Bibliografias = () => {
                         </tbody>
                     </Table>
             }
-            
+            <a className='btn btn-primary' onClick={prevPage}>Anterior</a>
+            <p>{page}</p>
+            <a className='btn btn-primary' onClick={nextPage}>Siguiente</a>
         </>
     );
 }
